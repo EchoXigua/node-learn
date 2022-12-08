@@ -1,0 +1,1 @@
+const ora = require('ora') //5版本是commonjs  6版本是es module  
