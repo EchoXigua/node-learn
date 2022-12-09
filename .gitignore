@@ -2,6 +2,6 @@
 
 #过滤掉任意目录下的node_modules
 **/node_modules/
-*/dist/
+**/dist/
 
 npm-debug.log
