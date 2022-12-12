@@ -7,10 +7,10 @@ const validator = require('../middleware/validator/userValidator')
 
 
 router
-  .post('/register',
+  .post('/registers',
     validator.register,
     userController.register)
-  .get('/list', userController.list)
+  .get('/lists', userController.list)
 
 
 
