@@ -5,11 +5,12 @@ const userController = require('../controller/user')
 
 const validator = require('../middleware/validator/userValidator')
 
+const { verifyToken } = require('../util/jwt')
 
 router
   .post('/registers', validator.register, userController.register)
   .post('/login', validator.login, userController.login)
-  .get('/lists', userController.list)
+  .get('/lists', verifyToken, userController.list)
 
 
 

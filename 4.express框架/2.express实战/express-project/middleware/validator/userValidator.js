@@ -25,6 +25,9 @@ module.exports.register =
           return Promise.reject('手机已被注册')
         }
       }).bail(),
+    body('password')
+      .notEmpty().withMessage('密码不能为空').bail()
+      .isLength({ min: 6 }).withMessage('密码长度不能小于6').bail()
   ])
 
 module.exports.login = validator([

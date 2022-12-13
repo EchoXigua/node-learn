@@ -1,16 +1,19 @@
 const mongoose = require('mongoose')
+const { mongoPath } = require('../config/config.default')
 
 async function main() {
   //链接数据库
-  await mongoose.connect('mongodb://localhost:27017/express-video')
+  await mongoose.connect(mongoPath)
 }
 
-main().then(res => {
-  console.log('mongo 链接成功');
-}).catch((err) => {
-  console.log(err);
-  console.log('mongo 链接失败');
-})
+main()
+  .then(res => {
+    console.log('mongo 链接成功');
+  })
+  .catch((err) => {
+    console.log(err);
+    console.log('mongo 链接失败');
+  })
 
 module.exports = {
   User: mongoose.model('User', require('./userModel'))
