@@ -1,6 +1,10 @@
 const { User } = require('../model')
 const { createToken } = require('../util/jwt')
 
+const fs = require('fs')
+const { promisify } = require('util')
+const rename = promisify(fs.rename)
+
 exports.register = async (req, res) => {
   const userModel = new User(req.body)
   const dbBack = await userModel.save()
@@ -32,6 +36,27 @@ exports.list = async (req, res) => {
 
 exports.delete = async (req, res) => {
   res.send('delete')
+}
+
+//修改
+exports.update = async (req, res) => {
+  //通过id来找到并更新  返回的结果是更改之前的  加一个配置项new:true，返回的结果为最新的
+  const updateData = await User.findByIdAndUpdate(req.user.userInfo._id, req.body, { new: true })
+  res.status(201).json({ user: updateData })
+}
+
+//处理用户头像上传
+exports.headImg = async (req, res) => {
+  console.log(req.file);
+  const fileArr = req.file.originalname.split('.')
+  const fileType = fileArr[fileArr.length - 1]
+  //重命名
+  try {
+    await rename('./public/' + req.file.filename, `./public/${req.file.filename}.${fileType}`)
+    res.status(201).json({ filePath: req.file.filename + '.' + fileType })
+  } catch (error) {
+    res.status(500).json({ error })
+  }
 }
 
 // module.exports = {

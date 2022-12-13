@@ -38,5 +38,30 @@ module.exports.login = validator([
     .notEmpty().withMessage('密码不能为空').bail()
 ])
 
+module.exports.update = validator([
+  body('email')
+    // .isEmail().withMessage('邮箱格式不正确').bail()
+    .custom(async (val) => {
+      const emailValidator = await User.findOne({ email: val })
+      if (emailValidator) {
+        return Promise.reject('邮箱已被注册')
+      }
+    }).bail(),
+  body('username')
+    .custom(async (val) => {
+      const nameValidator = await User.findOne({ username: val })
+      if (nameValidator) {
+        return Promise.reject('用户名已被注册')
+      }
+    }).bail(),
+  body('phone')
+    .custom(async (val) => {
+      const phoneValidator = await User.findOne({ phone: val })
+      if (phoneValidator) {
+        return Promise.reject('手机号已被注册')
+      }
+    }).bail(),
+])
+
 
 
