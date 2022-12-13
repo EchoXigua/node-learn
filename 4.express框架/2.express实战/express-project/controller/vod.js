@@ -12,11 +12,12 @@ function initVodClient(accessKeyId, accessSecret) {
 }
 
 exports.getVod = async (req, res) => {
-  const client = initVodClient('LTAI5tDqZRL4cJGm3kkcgUj9', 'Sz0lch1HyhF4P2fSfmI8f4vJVqZ9pr')
+  const client = initVodClient('test1', 'test2')
+  // const client = initVodClient('test1', 'test2')
   const vodBack = await client.request('CreateUploadVideo', {
     Title: 'this is a sample test',
     FileName: 'filename.mp4',
-    setStorageLocation: 'outin-75002b1e7ac311eda63200163e1c60dc.oss-cn-shanghai.aliyuncs.com'
+    setStorageLocation: '123'
   })
   console.log('vod', vodBack);
   res.status(200).json({ vod: vodBack })
