@@ -1,9 +1,65 @@
-const { User } = require('../model')
+const { User, Subscribe } = require('../model')
 const { createToken } = require('../util/jwt')
 
 const fs = require('fs')
 const { promisify } = require('util')
 const rename = promisify(fs.rename)
+
+//取消关注
+exports.unsubscribe = async (req, res) => {
+  const userId = req.user.userInfo._id //登录自己的id
+  const channelId = req.params.userId //传入的id
+  if (userId === channelId) {
+    return res.status(401).json({ err: '不能关注自己' })
+  }
+  const record = await Subscribe.findOne({
+    user: userId,
+    channel: channelId
+  })
+  if (record) {
+    //查到的数据删除
+    await record.remove()
+
+    //粉丝数-1
+    const user = await User.findById(channelId)
+    user.subscribeCount--
+    await user.save() //保存数据
+    res.status(200).json(user)
+  } else {
+    res.status(401).json({ err: '没有关注此用户' })
+  }
+}
+
+//关注
+exports.subscribe = async (req, res) => {
+  /**
+   * 1. 如果传入的id和 用户id是相同的（自己不能关注自己），则不允许
+   */
+
+  const userId = req.user.userInfo._id //登录自己的id
+  const channelId = req.params.userId //传入的id
+  if (userId === channelId) {
+    return res.status(401).json({ err: '不能关注自己' })
+  }
+  const record = await Subscribe.findOne({
+    user: userId,
+    channel: channelId
+  })
+  if (!record) {
+    await new Subscribe({
+      user: userId,
+      channel: channelId
+    }).save()
+
+    //粉丝数+1
+    const user = await User.findById(channelId)
+    user.subscribeCount++
+    await user.save() //保存数据
+    res.status(200).json({ msg: '关注成功' })
+  } else {
+    res.status(401).json({ err: '已经关注此用户' })
+  }
+}
 
 exports.register = async (req, res) => {
   const userModel = new User(req.body)

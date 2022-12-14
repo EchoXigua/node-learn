@@ -16,7 +16,9 @@ main()
   })
 
 module.exports = {
-  User: mongoose.model('User', require('./userModel'))
+  User: mongoose.model('User', require('./userModel')),
+  Video: mongoose.model('Video', require('./videoModel')),
+  Subscribe: mongoose.model('Subscribe', require('./subscribeModel')),
 }
 
 //创建数据模型

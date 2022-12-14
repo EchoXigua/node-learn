@@ -17,11 +17,14 @@ const upload = multer({ dest: 'public/' })
 
 
 router
+  //关注
+  .get('/unsubscribe/:userId', verifyToken(), userController.unsubscribe)
+  .get('/subscribe/:userId', verifyToken(), userController.subscribe)
   .post('/registers', validator.register, userController.register)
   .post('/login', validator.login, userController.login)
-  .put('/', verifyToken, validator.update, userController.update)
-  .post('/headimg', verifyToken, upload.single('headimg'), userController.headImg)
-  .get('/lists', verifyToken, userController.list)
+  .put('/', verifyToken(), validator.update, userController.update)
+  .post('/headimg', verifyToken(), upload.single('headimg'), userController.headImg)
+  .get('/lists', verifyToken(), userController.list)
 
 
 
