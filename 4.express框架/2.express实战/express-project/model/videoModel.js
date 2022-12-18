@@ -26,6 +26,20 @@ const videoSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  //评论数量
+  commentCount: {
+    type: Number,
+    default: 0
+  },
+  //喜欢
+  likeCount: {
+    type: Number,
+    default: 0
+  },
+  dislikeCount: {
+    type: Number,
+    default: 0
+  },
   ...baseModel
 })
 

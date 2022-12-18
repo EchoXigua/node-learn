@@ -4,14 +4,17 @@ const mongoose = require('mongoose')
 
 const baseModel = require('./baseModel')
 
-const subscribeSchema = new mongoose.Schema({
-  user: {
+const videoCommentSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: true
+  },
+  videoId: {
     type: mongoose.ObjectId,
     required: true,
-    ref: 'User'
+    ref: 'Video'//和Video集合关联
   },
-  //粉丝
-  channel: {
+  user: {
     type: mongoose.ObjectId,
     required: true,
     ref: 'User'
@@ -19,4 +22,4 @@ const subscribeSchema = new mongoose.Schema({
   ...baseModel
 })
 
-module.exports = subscribeSchema
+module.exports = videoCommentSchema

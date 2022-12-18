@@ -5,6 +5,54 @@ const fs = require('fs')
 const { promisify } = require('util')
 const rename = promisify(fs.rename)
 
+const lodash = require('lodash')
+
+//查看粉丝
+exports.getSubscribe = async (req, res) => {
+  const subscribeList = await Subscribe.find({ user: req.params.userId })
+    .populate('channel')
+  subscribeList = subscribeList.map(item => {
+    lodash.pick(item.channel, [
+      '_id',
+      'username',
+      'image',
+      'subscribeCount',
+      'cover',
+      'descrition',
+    ])
+  })
+  res.status(200).json(subscribeList)
+}
+
+exports.getUser = async (req, res) => {
+  let isSubscribe = false
+
+  if (req.user) {
+    const record = await Subscribe.findOne({
+      channel: req.params.userId,
+      user: req.user.userInfo._id
+    })
+    if (record) {
+      isSubscribe = true
+    }
+  }
+  const user = await User.findById(req.params.userId)
+  user.isSubscribe = isSubscribe
+  res.status(200).json({
+    ...lodash.pick(user, [
+      "_id",
+      "username",
+      "image",
+      "sbuscribeCount",
+    ]),
+    isSubscribe
+  }
+
+  )
+}
+
+
+
 //取消关注
 exports.unsubscribe = async (req, res) => {
   const userId = req.user.userInfo._id //登录自己的id

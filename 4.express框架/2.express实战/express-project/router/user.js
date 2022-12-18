@@ -17,8 +17,12 @@ const upload = multer({ dest: 'public/' })
 
 
 router
-  //关注
+  //查看粉丝
+  .get('/getsubscribe/:userId', userController.getSubscribe)
+  .get('/getuser/:userId', userController.getUser)
+  //取消关注
   .get('/unsubscribe/:userId', verifyToken(), userController.unsubscribe)
+  //关注
   .get('/subscribe/:userId', verifyToken(), userController.subscribe)
   .post('/registers', validator.register, userController.register)
   .post('/login', validator.login, userController.login)

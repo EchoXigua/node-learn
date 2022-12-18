@@ -6,6 +6,10 @@ const { verifyToken } = require('../util/jwt')
 const { videoValidator } = require('../middleware/validator/videoValidator')
 
 router
+  .get('/like/:videoId', verifyToken(), videoController.likeVideo)
+  .delete('/comment/:videoId/:commentId', verifyToken(), videoController.deleteComment)
+  .get('/commentlist/:videoId', videoController.commentList) //获取评论列表
+  .post('/comment/:videoId', verifyToken(), videoController.comment)
   .get('/videolist', videoController.videoList)
   /**
    * 需要将接口做为半登陆的状态，这里需要外部传参数，来做不同的处理
