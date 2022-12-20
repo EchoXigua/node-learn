@@ -1,4 +1,50 @@
-const { Video, VideoComment, Videolike, Subscribe } = require('../model')
+const { Video, VideoComment, Videolike, Subscribe, Collect } = require('../model')
+const { hotInc, topHots } = require('../model/redis/host')
+
+/**
+ *  视频热门机制
+ *  观看+1
+ *  点赞+2
+ *  评论+2
+ *  收藏+3
+ */
+
+exports.getHots = async (req, res) => {
+  const topnum = req.params.topnum
+  const tops = await topHots(topnum)
+  res.status(200).json({ tops })
+}
+
+
+exports.collect = async (req, res) => {
+  const videoId = req.params.videoId
+  const userId = req.user.userInfo._id
+  const video = await Video.findById(videoId)
+  if (!video) {
+    return res.status(404).json({ err: '视频不存在' })
+  }
+  //当前用户有没有收藏改视频
+  const doc = await Collect.findOne({
+    user: userId,
+    videoId
+  })
+  if (doc) {
+    return res.status(403).json({ err: '视频已经被收藏了' })
+  }
+  const myCollect = await new Collect({
+    user: userId,
+    videoId
+  }).save()
+
+  //让改视频增长热度
+  if (myCollect) {
+    await hotInc(videoId, 3)
+  }
+
+
+  res.status(200).json({ myCollect })
+
+}
 
 exports.likelist = async (req, res) => {
   const { pageNum = 1, pageSize = 10 } = req.body
@@ -88,12 +134,15 @@ exports.likeVideo = async (req, res) => {
   } else if (doc && doc.like === -1) {
     doc.like = 1
     await doc.save()
+    //增长热度
+    await hotInc(videoId, 2)
   } else {
     await new Videolike({
       user: userId,
       videoId,
       like: 1
-    })
+    }).save()
+    await hotInc(videoId, 2)
   }
 
   //找到视频喜欢的数量
@@ -157,6 +206,8 @@ exports.comment = async (req, res) => {
     videoId,
     user: req.user.userInfo._id
   }).save()
+  await hotInc(videoId, 2)
+
   videoInfo.commentCount++
   await videoInfo.save()
   res.status(201).json(comment)
@@ -205,6 +256,7 @@ exports.video = async (req, res) => {
       videoInfo.isSubscribe = true
     }
   }
+  await hotInc(videoId, 1)
   res.status(200).json(videoInfo)
 }
 

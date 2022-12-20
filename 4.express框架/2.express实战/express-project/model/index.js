@@ -20,7 +20,8 @@ module.exports = {
   Video: mongoose.model('Video', require('./videoModel')),
   Subscribe: mongoose.model('Subscribe', require('./subscribeModel')),
   VideoComment: mongoose.model('VideoComment', require('./VideoCommentModel')),
-  Videolike: mongoose.model('Videolike', require('./VideolikeModel')),
+  Videolike: mongoose.model('Videolike', require('./videolikeModel')),
+  Collect: mongoose.model('Collect', require('./collectModel')),
 }
 
 //创建数据模型
