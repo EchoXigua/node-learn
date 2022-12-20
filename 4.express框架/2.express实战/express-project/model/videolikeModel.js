@@ -10,22 +10,16 @@ const videolikeSchema = new mongoose.Schema({
     required: true,
     ref: 'User'
   },
-  video: {
-    type: String,
+  videoId: {
+    type: mongoose.ObjectId,
     required: true,
-    ref: 'Video'
+    ref: 'Video'//和Video集合关联
   },
   like: {
     type: Number,
     enum: [1, -1], //1喜欢
     required: true
   },
-  videoId: {
-    type: mongoose.ObjectId,
-    required: true,
-    ref: 'Video'//和Video集合关联
-  },
-
   ...baseModel
 })
 

@@ -1,11 +1,76 @@
-const { Video, VideoComment, Videolike } = require('../model')
+const { Video, VideoComment, Videolike, Subscribe } = require('../model')
+
+exports.likelist = async (req, res) => {
+  const { pageNum = 1, pageSize = 10 } = req.body
+  const likes = await Videolike.find({
+    like: 1,
+    user: req.user.userInfo._id
+  }).skip((pageNum - 1) * pageSize)
+    .limit(pageSize)
+    .populate('videoId', '_id title vodVideoId user')
+  const likeCount = await Videolike.countDocuments({
+    like: 1,
+    user: req.user.userInfo._id
+  })
+  res.status(200).json({ likes, likeCount })
+}
+
+exports.dislikeVideo = async (req, res) => {
+  const videoId = req.params.videoId
+  const userId = req.user.userInfo._id
+  //先判断视频是否还存在
+  const video = await Video.findById(videoId)
+  if (!video) {
+    return res.status(404).json({ err: '视频不存在' })
+  }
+  const doc = await Videolike.findOne({
+    user: userId,
+    videoId
+  })
+
+  let isDislike = true
+
+  if (doc && doc.like === -1) {
+    //如果是喜欢的，第二次就删除喜欢
+    await doc.remove()
+  } else if (doc && doc.like === 1) {
+    doc.like = -1
+    await doc.save()
+    isDislike = false
+  } else {
+    await new Videolike({
+      user: userId,
+      videoId,
+      like: 1
+    }).save()
+    isDislike = false
+  }
+
+  //找到视频喜欢的数量
+  video.likeCount = await Videolike.countDocuments({
+    videoId,
+    like: 1
+  })
+
+  video.dislikeCount = await Videolike.countDocuments({
+    videoId,
+    like: -1
+  })
+
+  await video.save()
+  res.status(200).json({
+    ...video.toJSON(),
+    isDislike
+  })
+
+}
 
 
 exports.likeVideo = async (req, res) => {
   const videoId = req.params.videoId
   const userId = req.user.userInfo._id
   //先判断视频是否还存在
-  const video = await Video.findById({ videoId })
+  const video = await Video.findById(videoId)
   if (!video) {
     return res.status(404).json({ err: '视频不存在' })
   }
@@ -44,7 +109,7 @@ exports.likeVideo = async (req, res) => {
 
   await video.save()
   res.status(200).json({
-    ...video.toJson(),
+    ...video.toJSON(),
     isLike
   })
 
@@ -115,10 +180,32 @@ exports.videoList = async (req, res) => {
 }
 
 exports.video = async (req, res) => {
-  const videoInfo = await Video.findById(req.params.videoId)
+  const videoId = req.params.videoId
+  let videoInfo = await Video.findById(videoId)
     //第二个参数为需要查询的字段名 空格隔开
     .populate('user', '_id username cover')
-  res.send(videoInfo)
+
+  videoInfo = videoInfo.toJSON()
+
+  videoInfo.islike = true
+  videoInfo.isDislike = false
+  videoInfo.isSubscribe = false
+
+  if (req.user.userInfo) {
+    //说明登录了
+    const userId = req.user.userInfo._id
+    //曾经喜欢过
+    if (await Videolike.findOne({ user: userId, videoId, like: 1 })) {
+      videoInfo.islike = true
+    }
+    if (await Videolike.findOne({ user: userId, videoId, like: -1 })) {
+      videoInfo.isDislike = true
+    }
+    if (await Subscribe.findOne({ user: userId, channel: videoInfo.user._id })) {
+      videoInfo.isSubscribe = true
+    }
+  }
+  res.status(200).json(videoInfo)
 }
 
 exports.createVideo = async (req, res) => {
