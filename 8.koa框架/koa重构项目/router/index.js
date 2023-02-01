@@ -9,7 +9,9 @@ const { verifyToken } = require('../utils/jwt')
 // router.get('/user/:userId', userController.index)
 router.post('/user/register', registerValidate, userController.register)
 router.post('/user/login', loginValidate, userController.login)
-router.get('/user/getUser', verifyToken(), userController.getUser)
+router.get('/user/getUser/:userId', verifyToken(false), userController.getUser)
+router.get('/user/subscribe/:subscribeId', verifyToken(), userController.subscribe)
+router.get('/user/subscribeList', verifyToken(), userController.subscribeList)
 
 
 module.exports = router
